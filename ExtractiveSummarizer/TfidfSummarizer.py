@@ -46,3 +46,25 @@ class TfidfSummarizer:
                 word = feature_names[idx]
                 word_scores[word] += tfidf_matrix[i, idx]
         return word_scores
+
+    @staticmethod  # Суммаризация текста
+    def summarize_text2(text) -> str:
+        article_text = re.sub(r'\s+', ' ', text)
+        sentences = nltk.sent_tokenize(article_text)
+        preprocessed_sentences = [TfidfSummarizer._text_preprocessing(sentence) for sentence in sentences]
+        sentence_scores = TfidfSummarizer._get_sentence_scores(preprocessed_sentences)
+        sentence_scores = {sentence: score for sentence, score in zip(sentences, sentence_scores)}
+        average_score = sum(sentence_scores.values()) / len(sentence_scores)
+        selected_sentences = []
+        for sentence, score in sentence_scores.items():
+            if score > average_score:
+                selected_sentences.append(sentence)
+        return ' '.join(selected_sentences)
+
+    @staticmethod
+    def _get_sentence_scores(sentences):
+        vectorizer = TfidfVectorizer()
+        tfidf_matrix = vectorizer.fit_transform(sentences)
+        tfidf_values = tfidf_matrix.toarray()
+        sentence_scores = tfidf_values.sum(axis=1)
+        return sentence_scores
