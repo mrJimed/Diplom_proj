@@ -7,8 +7,22 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class TfidfSummarizer:
+    @staticmethod
+    def summarize_text(text, sentences_count=3) -> str:
+        article_text = re.sub(r'\s+', ' ', text)
+        sentences = nltk.sent_tokenize(article_text)
+        preprocessed_sentences = [TfidfSummarizer._text_preprocessing(sentence) for sentence in sentences]
+        weighted_word_frequency = TfidfSummarizer._get_weighted_word_frequency(preprocessed_sentences)
+        sentences_scores = defaultdict(float)
+        for preprocessed_sentence, orig_sentence in zip(preprocessed_sentences, sentences):
+            for word in nltk.word_tokenize(preprocessed_sentence):
+                if word in weighted_word_frequency.keys():
+                    sentences_scores[orig_sentence] += weighted_word_frequency[word]
+        selected_sentences = sorted(sentences_scores.keys(), key=lambda x: sentences_scores[x], reverse=True)[:sentences_count]
+        return ' '.join(selected_sentences)
+
     @staticmethod  # Суммаризация текста
-    def summarize_text(text) -> str:
+    def summarize_text_average(text) -> str:
         article_text = re.sub(r'\s+', ' ', text)
         sentences = nltk.sent_tokenize(article_text)
         preprocessed_sentences = [TfidfSummarizer._text_preprocessing(sentence) for sentence in sentences]
@@ -46,25 +60,3 @@ class TfidfSummarizer:
                 word = feature_names[idx]
                 word_scores[word] += tfidf_matrix[i, idx]
         return word_scores
-
-    @staticmethod  # Суммаризация текста
-    def summarize_text2(text) -> str:
-        article_text = re.sub(r'\s+', ' ', text)
-        sentences = nltk.sent_tokenize(article_text)
-        preprocessed_sentences = [TfidfSummarizer._text_preprocessing(sentence) for sentence in sentences]
-        sentence_scores = TfidfSummarizer._get_sentence_scores(preprocessed_sentences)
-        sentence_scores = {sentence: score for sentence, score in zip(sentences, sentence_scores)}
-        average_score = sum(sentence_scores.values()) / len(sentence_scores)
-        selected_sentences = []
-        for sentence, score in sentence_scores.items():
-            if score > average_score:
-                selected_sentences.append(sentence)
-        return ' '.join(selected_sentences)
-
-    @staticmethod
-    def _get_sentence_scores(sentences):
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(sentences)
-        tfidf_values = tfidf_matrix.toarray()
-        sentence_scores = tfidf_values.sum(axis=1)
-        return sentence_scores
