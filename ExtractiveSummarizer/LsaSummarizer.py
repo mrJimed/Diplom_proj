@@ -40,7 +40,7 @@ class LsaSummarizer:
         return matrix
 
     @staticmethod
-    def summarize_text(text, sentences_count=3):
+    def summarize_text(text, sentences_count=3) -> str:
         orig_sentences = [sentence for sentence in sent_tokenize(text)]
         preprocessed_sentences = [LsaSummarizer._text_preprocessing(sentence) for sentence in orig_sentences]
         unique_words = set()
@@ -63,7 +63,7 @@ class LsaSummarizer:
         return " ".join([orig_sentences[idx] for idx in ordered_indices_score])
 
     @staticmethod
-    def summarize_text_average(text):
+    def summarize_text_average(text) -> str:
         orig_sentences = [sentence for sentence in sent_tokenize(text)]
         preprocessed_sentences = [LsaSummarizer._text_preprocessing(sentence) for sentence in orig_sentences]
         unique_words = set()
