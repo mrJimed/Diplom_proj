@@ -1,15 +1,17 @@
 import textwrap
 from transformers import AutoTokenizer, T5ForConditionalGeneration
+import torch
 
 
 class T5Summarizer:
     def __init__(self):
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._model_name = "IlyaGusev/rut5_base_sum_gazeta"
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        self._model = T5ForConditionalGeneration.from_pretrained(self._model_name)
+        self._model = T5ForConditionalGeneration.from_pretrained(self._model_name).to(self._device)
 
     def _summarize(self, text, max_length, min_length):
-        tokenized_text = self._tokenizer.encode(text, return_tensors="pt")
+        tokenized_text = self._tokenizer.encode(text, return_tensors="pt").to(self._device)
         max_tokens = int(max_length * tokenized_text.size(1))
         min_tokens = int(min_length * tokenized_text.size(1))
 
@@ -17,7 +19,7 @@ class T5Summarizer:
             max_length=max_tokens,
             input_ids=tokenized_text,
             no_repeat_ngram_size=4,
-            num_beams=10,
+            num_beams=12,
             early_stopping=True,
             length_penalty=0.5,
             min_length=min_tokens
