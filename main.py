@@ -1,28 +1,28 @@
-# nltk.download('stopwords')
+from summarization.extractive.TfidfSummarizer import TfidfSummarizer
+from summarization.abstractive.BartSummarizer import BartSummarizer
+from flask import Flask, render_template, request
 
-from ExtractiveSummarizer.TfidfSummarizer import TfidfSummarizer
+app = Flask(__name__)
 
-text = """
-Не согласны? Давайте посмотрим, кто такой программист, чем он занимается и какого рода работу выполняет. Когда компания нанимает кодера, к нему предъявляются некоторые требования. Например, нужно владеть Python, C#, знать какие-то инструменты и фреймворки. Кроме того, разработчик должен уметь понимать входящие условия от системного аналитика и отвечать за работоспособность кода.
 
-Но уже сейчас ИИ может выполнять подобные задачи не хуже разработчиков. Нейросети получили огромную базу знаний, они «понимают», как писать и оптимизировать код на нужном языке.
+@app.route('/', methods=["GET"])
+def index():
+    return render_template('html/index.html')
 
-Есть мнение, что заменить кодеров машиной проще, чем менеджеров. Все разработчики оставляют цифровой след через написанный код, некоторые даже документируют все свои шаги. Соответственно, нейросети ничего не стоит изучить техническую документацию и начать работу на основе полученной информации.
 
-Часто говорят, что программирование — креативная работа. В то же время элемент творчества здесь не слишком значительный, да и далеко не каждый разработчик настоящий творец. Большинство тасков — рутина, с которой прекрасно справится и нейросеть. И мы говорим сейчас не только о написании кода, но и о поиске багов, развёртывании, оптимизации алгоритмом работы со структурами данных и других подобных задачах.
-В большинстве из них никакой креативности нет, их выполнение можно автоматизировать. Вот как выглядит процесс работы над средним корпоративным проектом:
+@app.route('/extractive', methods=["POST"])
+def extractive_summarization():
+    input_text = request.form['inputText']
+    summarize = TfidfSummarizer.summarize_text(input_text)
+    return render_template('html/index.html', summarization_text=summarize)
 
-есть бизнес-оунер, он формирует бизнес-требования;
 
-аналитик всё это изучает и ставит точные задачи;
+@app.route('/abstractive', methods=["POST"])
+def abstractive_summarization():
+    input_text = request.form['inputText']
+    bart = BartSummarizer()
+    summarize = bart.summarize_text(input_text)
+    return render_template('html/index.html', summarization_text=summarize)
 
-они разбиваются на атомарные девтаски, которые мы размещаем, например, в Jira;
 
-таски выполняются, проект готовится;
-
-ищутся и правятся баги.
-""".strip()
-
-summarize = TfidfSummarizer.summarize_text(text)
-print(f'orig len: {len(text)}\nsumm_len: {len(summarize)}\n')
-print(summarize)
+app.run()
