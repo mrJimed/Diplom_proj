@@ -13,7 +13,7 @@ def abstractive_metrix(model, max_length, min_length, n_rows=15):
     results = []
     for idx, (text, orig_summary) in enumerate(zip(df_test['text'][:n_rows], df_test['summary'][:n_rows])):
         print(f'Начал текст № {idx}')
-        summarize = model.summarize_text(text, max_length=max_length, min_length=min_length, chunk_size=1000)
+        summarize = model.summarize_text(text, max_length=max_length, min_length=min_length)
         results.append((summarize, orig_summary))
         print(f'Закончил текст № {idx}\n')
     rouge = Rouge()
