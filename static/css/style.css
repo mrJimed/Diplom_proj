@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.center-container {
+    text-align: center;
+}
+
+.container {
+    max-width: 600px; /* Увеличено значение для более широкого контейнера */
+    margin: 0 auto;
+    text-align: center;
+}
+
+.file-input {
+    display: none;
+}
+
+.drop-area {
+    border: 2px dashed #ccc;
+    padding: 40px; /* Увеличено значение для более широкой области перетаскивания */
+    cursor: pointer;
+}
+
+.process-button {
+    margin-top: 20px; /* Увеличено значение для большего отступа */
+    padding: 15px; /* Увеличено значение для более крупной кнопки */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.progress-bar {
+    margin-top: 20px; /* Увеличено значение для большего отступа */
+    height: 30px; /* Увеличено значение для более высокой полосы прогресса */
+    background-color: #e0e0e0;
+}
+
+.output-field {
+    margin-top: 20px; /* Увеличено значение для большего отступа */
+    width: 100%;
+    height: 200px; /* Увеличено значение для более высокого текстового поля */
+    resize: none;
+}

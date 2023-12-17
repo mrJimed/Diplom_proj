@@ -1,8 +1,11 @@
 import torch
 import math
-from nltk import sent_tokenize
+from nltk import sent_tokenize, word_tokenize
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 
+# Комбинации
+# no_repeat_ngram_size=7, num_beams=20 - при max_length=0.1, min_length=0.05
+# no_repeat_ngram_size=9, num_beams=3 - при max_length=0.1, min_length=0.05
 
 class T5Summarizer:
     def __init__(self):
@@ -28,7 +31,7 @@ class T5Summarizer:
         summary = self._tokenizer.decode(output_ids, skip_special_tokens=True)
         return summary
 
-    def _get_chunks(self, text, max_length) -> list:
+    def _get_chunks_by_sentences(self, text, max_length) -> list:
         sentences = sent_tokenize(text)
         chunks = []
         current_sentence = ''
@@ -45,10 +48,30 @@ class T5Summarizer:
                 chunks.append(current_sentence)
         return chunks
 
+    def _get_chunks_by_word(self, text, max_length) -> list:
+        words = word_tokenize(text)
+        chunks = []
+        current_sentence = ''
+        for word in words:
+            if len(current_sentence) + len(word) <= max_length:
+                current_sentence += f' {word}' if current_sentence else word
+            else:
+                chunks.append(current_sentence)
+                current_sentence = word
+
+        if current_sentence:
+            chunks[-1] += current_sentence
+        return chunks
+
+    def _get_chunks(self, text, max_length) -> list:
+        if text in ['.', '!', '?']:
+            return self._get_chunks_by_sentences(text, max_length)
+        return self._get_chunks_by_word(text, max_length)
+
     def summarize_text(self, text, max_length=0.7, min_length=0.4) -> str:
         tokenized_text = self._tokenizer.encode(text, return_tensors="pt").to(self._device)
         if tokenized_text.size(1) > 1024:
-            chunks = self._get_chunks(text, math.ceil(len(text) / math.ceil(tokenized_text.size(1) / 1024)))
+            chunks = self._get_chunks(text, math.ceil(len(text) / math.ceil(len(text) / 3000)))
             summarized_texts = []
             for chunk in chunks:
                 summarized_texts.append(self._summarize(chunk, max_length, min_length))
